@@ -1,0 +1,33 @@
+services:
+  # Base de Datos: Requisito de persistencia [cite: 182]
+  dbserver:
+    image: postgres:${DB_POSTGRES_VERSION}
+    restart: always
+    container_name: dbserver
+    # Elimino par no exponer el puerto
+    # ports:
+    #   - "5432:5432"  # <--- ESTO ES LO QUE FALTA para acceder fuera de docker   
+    env_file:
+      - ../.env
+    environment:
+      # Reutilizar la variable del .env para el test del Healthcheck
+      - PGPASSWORD=${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d transcendence && psql -U postgres -d transcendence -c \"SELECT COUNT(*) FROM pg_tables WHERE schemaname = 'public';\" | grep -q '[1-9]'"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - db_data:/var/lib/postgresql/${DB_POSTGRES_VERSION}/docker
+      - ./scripts_init:/docker-entrypoint-initdb.d/
+    networks:
+      transcendence_net:
+        aliases:
+          - dbserver_alias
+
+    logging:
+      driver: "json-file" # Use json-file for easier access if you need to debug raw logs
+      options:
+        max-size: "30k" # Keep each log file up to 30KB
+        max-file: "3"   # Keep the 3 most recent log files
+

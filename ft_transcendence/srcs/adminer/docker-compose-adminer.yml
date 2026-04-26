@@ -1,0 +1,13 @@
+services:
+
+  adminer:
+    image: ${ADMINER_IMAGE}
+    restart: always
+    container_name: ${ADMINER_CONTAINER_NAME}    
+    # Elimino par no exponer el puerto
+    # ports:
+    #   - ${ADMINER_CONTAINER_PORT}:${ADMINER_CONTAINER_PORT} # Puerto para Adminer
+    networks:
+      transcendence_net:
+        aliases:
+          - adminer_alias

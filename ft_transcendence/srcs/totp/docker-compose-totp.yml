@@ -1,0 +1,22 @@
+services:
+  totp:
+    build:
+      context: .
+      args:
+        TOTP_CONTAINER_PORT: ${TOTP_CONTAINER_PORT}
+    container_name: ${TOTP_CONTAINER_NAME}
+    image: ${TOTP_CONTAINER_NAME}
+    
+    #Elimino, no se expone al exterior
+    # ports:
+    #   - ${TOTP_CONTAINER_PORT}:${TOTP_CONTAINER_PORT}
+    volumes:
+      - .:/app
+    networks:
+      transcendence_net:
+        aliases:
+          - totp_alias
+    env_file:
+      - ../.env
+    restart: always
+

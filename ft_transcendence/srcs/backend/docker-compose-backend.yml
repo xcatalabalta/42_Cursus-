@@ -1,0 +1,28 @@
+services:
+  # 2. Backend (NestJS + Socket.io Gateway)
+  backend:
+    build:
+      context: .
+      args:
+          BE_CONTAINER_PORT: ${BE_CONTAINER_PORT}    
+    container_name: ${BE_CONTAINER_NAME}
+    image: ${BE_CONTAINER_NAME}
+
+    restart: on-failure
+    depends_on:
+      dbserver:
+        condition: service_healthy
+    # Elimino par no exponer el puerto
+    # ports:
+    #   - ${BE_CONTAINER_PORT}:${BE_CONTAINER_PORT} # Puerto para API y WebSockets
+    volumes:
+      - .:/app
+      - /app/node_modules
+    env_file:
+      - ../.env
+    environment: # Adiciono esto
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${POSTGRES_DB}
+    networks:
+      transcendence_net:
+        aliases:
+          - backend_alias

@@ -1,0 +1,62 @@
+//backend/src/app.module.ts
+import { Module } from '@nestjs/common';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { ConfigModule } from '@nestjs/config'; // <--- Imported to load .env
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+// Importamos tu nuevo receptor de mensajes (Gateway)
+//import { GameGateway } from './game.gateway';
+import { GatewayModule } from './gateway.module'; //adicionado en lugar de GameGateway
+import { DatabaseModule } from './database.module'; // ORM DRIZZLE
+
+// --- NEW IMPORTS ---
+// Adjust the path if you placed them somewhere else, 
+// but based on our plan they should be in ./auth/    
+import { AuthController } from './auth/auth.controller';  
+import { AuthService } from './auth/auth.service';  
+// --- COUNTRIES ---
+import { CountriesModule } from './countries/countries.module';
+// --- FRIENDS ---
+import { FriendsModule } from './friends/friends.module';
+import { ChatModule } from './chat/chat.module';
+// --- AUTH MODULE ---
+import { AuthModule } from './auth/auth.module';
+
+// --- METRICS DBSERVER ---
+import { ScheduleModule } from '@nestjs/schedule';
+import { MetricsModule } from './metrics/metrics.module';
+
+// --- STADISTICS ---
+import { StatsModule } from './stats/stats.module';
+
+@Module({
+  imports: [
+    // Activar el sistema de Cron Jobs (Tareas programadas)
+    ScheduleModule.forRoot(),
+    PrometheusModule.register({
+      path: '/metrics', // Esto crea la ruta http://localhost:3000/metrics
+      defaultMetrics: {
+        enabled: true, // Activa métricas básicas (CPU, RAM, Node.js)
+      },
+    }),
+    ConfigModule.forRoot({ isGlobal: true }), // Loads .env file globally
+    MetricsModule,
+    DatabaseModule,
+    CountriesModule,
+    FriendsModule,
+    GatewayModule,
+    ChatModule,
+    AuthModule, // <--- Added AuthModule here
+    StatsModule, 
+  ],
+  controllers: [
+    AppController, 
+    //AuthController // <--- Add Controller here (exposes /auth/login endpoints)
+  ],
+  providers: [
+    AppService, 
+    //GameGateway, 
+    //AuthService    // <--- Add Service here (handles password hashing & DB)
+  ],
+})
+export class AppModule {}
